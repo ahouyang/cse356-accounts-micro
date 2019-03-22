@@ -19,8 +19,11 @@ class Authenticate(Resource):
 			return {'status': 'ERROR', 'message': 'invalid username'}
 		elif user['password'] != args['password']:
 			return {'status': 'ERROR', 'message': 'incorrect password'}
-		else:
+		elif user['enabled']:
 			return {'status': 'OK'}
+		else:
+			return {'status': 'ERROR', 'message': 'not verified'}
+
 class Verify(Resource):
 	def post(self):
 		args = parse_args_list(['email', 'key'])
