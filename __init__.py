@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, make_response, jsonify
 from flask_restful import Resource, Api, reqparse
-import pymongo
-import datetime
-import sys
-import smtplib, ssl
-import string
+import pymongo 
+import datetime 
+import sys 
+import smtplib, ssl 
+import string 
 import random
 
 app = Flask(__name__)
@@ -30,11 +30,11 @@ class Verify(Resource):
 		email = args['email']
 		key = args['key']
 		users = get_users_coll()
-		user = users.find_one({"email":email})
+		user = users.find_one({"email":args['email']})
 		if user is None:
 			return {'status':'ERROR', 'message': 'no such email'}
 		elif user['verification'] == key or key == 'abracadabra':
-			users.update_one({"email":email}, {"$set":{"enabled":True}})
+			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
 			return {'status':'ERROR', 'message': 'incorrect verification key'}
@@ -43,9 +43,9 @@ class ValidateNew(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'email'])
 		users = get_users_coll()
-		if users.find({"username":username}).count() > 0:
+		if users.find({"username":args['username']}).count() > 0:
 			return {"status":"ERROR", "message":"The requested username has already been taken."}	
-		if users.find({"email":email}).count() > 0:
+		if users.find({"email":args['email']}).count() > 0:
 			return {"status":"ERROR", "message":"The requested email has already been taken."}
 		else:
 			return {'status': 'OK'}
@@ -88,7 +88,7 @@ class AddUser(Resource):
 			print(e, sys.stderr)			
 			return {"status":"ERROR"}
 	
-	def _send_email(receiver, message):
+	def _send_email(self, receiver, message):
 		port = 465  # For SSL
 		password = "W2v0&lkde"
 		# Create a secure SSL context
