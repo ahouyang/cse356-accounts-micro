@@ -62,21 +62,7 @@ class AddUser(Resource):
 			user['email'] = email
 			user['verification'] = self._generate_code()
 			user['enabled'] = False
-			user['games'] = []
-			game = {}
-			now = datetime.datetime.now()
-			month = str(now.month) if len(str(now.month)) == 2 else '0' + str(now.month)
-			day = str(now.day) if len(str(now.day)) == 2 else '0' + str(now.day)
-			date = str(now.year) + '-' + month + '-' + day
-			game['id'] = 1
-			game['start_date'] = date
-			game['grid'] = [" "," "," "," "," "," "," "," "," "]
-			# user['games'].append(game)
-			user['current_game'] = game
-			user['score'] = {}
-			user['score']['wins'] = 0
-			user['score']['wgor'] = 0
-			user['score']['tie'] = 0
+			user['reputation'] = 0
 			url = 'http://130.245.170.86/verify?email=' + email + '&key=' + user['verification']
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
@@ -110,7 +96,7 @@ def parse_args_list(argnames):
 
 def get_users_coll():
 	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
-	mydb = myclient['warmup2']
+	mydb = myclient['finalproject']
 	users = mydb['users']
 	return users
 
