@@ -14,6 +14,7 @@ class Authenticate(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'password'])
 		users = get_users_coll()
+		print('--------------------------args:' + str(args), sys.stderr)
 		user = users.find_one({'username': args['username']})
 		if user is None:
 			return {'status': 'ERROR', 'message': 'invalid username'}
@@ -22,7 +23,7 @@ class Authenticate(Resource):
 		elif user['enabled']:
 			return {'status': 'OK'}
 		else:
-			return {'status': 'ERROR', 'message': 'not verified'}
+			return {'status': 'error', 'message': 'not verified'}
 
 class Verify(Resource):
 	def post(self):
@@ -32,21 +33,21 @@ class Verify(Resource):
 		users = get_users_coll()
 		user = users.find_one({"email":args['email']})
 		if user is None:
-			return {'status':'ERROR', 'message': 'no such email'}
+			return {'status':'error', 'message': 'no such email'}
 		elif user['verification'] == key or key == 'abracadabra':
 			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
-			return {'status':'ERROR', 'message': 'incorrect verification key'}
+			return {'status':'error', 'message': 'incorrect verification key'}
 
 class ValidateNew(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'email'])
 		users = get_users_coll()
 		if users.find({"username":args['username']}).count() > 0:
-			return {"status":"ERROR", "message":"The requested username has already been taken."}	
+			return {"status":"error", "message":"The requested username has already been taken."}	
 		if users.find({"email":args['email']}).count() > 0:
-			return {"status":"ERROR", "message":"The requested email has already been taken."}
+			return {"status":"error", "message":"The requested email has already been taken."}
 		else:
 			return {'status': 'OK'}
 class AddUser(Resource):
@@ -72,7 +73,7 @@ class AddUser(Resource):
 			return {"status":"OK"}
 		except Exception as e:
 			print(e, sys.stderr)			
-			return {"status":"ERROR"}
+			return {"status":"error"}
 	
 	def _send_email(self, receiver, message):
 		port = 465  # For SSL
