@@ -17,13 +17,13 @@ class Authenticate(Resource):
 		print('--------------------------args:' + str(args), sys.stderr)
 		user = users.find_one({'username': args['username']})
 		if user is None:
-			return {'status': 'error', 'error': 'invalid username'}
+			return {'status': 'error', 'message': 'invalid username'}
 		elif user['password'] != args['password']:
-			return {'status': 'error', 'error': 'incorrect password'}
+			return {'status': 'error', 'message': 'incorrect password'}
 		elif user['enabled']:
 			return {'status': 'OK'}
 		else:
-			return {'status': 'error', 'error': 'not verified'}
+			return {'status': 'error', 'message': 'not verified'}
 
 class Verify(Resource):
 	def post(self):
