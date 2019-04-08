@@ -87,6 +87,25 @@ class AddUser(Resource):
 	def _generate_code(self):
 		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
+class GetUserProfile(Resource):
+	def get(self, username):
+		args = parse_args_list(['username'])
+		username = args['username']
+		users = get_users_coll()
+		founduser = users.find_one({'username':username})
+		if founduser is None:
+			return {'status': 'error'}
+		resp = {}
+		
+		user = {}
+		user['email'] = founduser['email']
+		user['reputation'] = founduser['reputation']
+		
+		resp['user'] = user
+		resp['status'] = 'OK'
+
+		return resp
+
 
 def parse_args_list(argnames):
 	parser = reqparse.RequestParser()
@@ -105,6 +124,7 @@ api.add_resource(Authenticate, '/authenticate')
 api.add_resource(Verify, '/verify')
 api.add_resource(ValidateNew, '/validatenew')
 api.add_resource(AddUser, '/adduser')
+api.add_resource(GetUserProfile, '/getuser')
 
 
 if __name__ == '__main__':
