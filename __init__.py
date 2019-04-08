@@ -88,7 +88,7 @@ class AddUser(Resource):
 		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
 class GetUserProfile(Resource):
-	def get(self, username):
+	def get(self):
 		args = parse_args_list(['username'])
 		username = args['username']
 		users = get_users_coll()
