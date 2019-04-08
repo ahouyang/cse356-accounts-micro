@@ -90,9 +90,8 @@ class AddUser(Resource):
 class GetUserProfile(Resource):
 	def get(self):
 		args = parse_args_list(['username'])
-		username = args['username']
 		users = get_users_coll()
-		founduser = users.find_one({'username':username})
+		founduser = users.find_one({'username':args['username']})
 		if founduser is None:
 			return {'status': 'error'}
 		resp = {}
@@ -106,6 +105,25 @@ class GetUserProfile(Resource):
 
 		return resp
 
+class GetUserQuestions(Resource):
+	def get(self):
+		args = parse_args_list(['username'])
+		users = get_users_coll()
+		founduser = users.find_one({'username':args['username']})
+		if founduser is None:
+			return {'status': 'error'}
+		questions = get_questions_coll()
+		return get_collection_by_id(username, questions)
+
+class GetUserAnswers(Resource):
+	def get(self):
+		args = parse_args_list(['username'])
+		users = get_users_coll()
+		founduser = users.find_one({'username':args['username']})
+		if founduser is None:
+			return {'status': 'error'}
+		answers = get_answers_coll()
+		return get_collection_by_id(username, answers)
 
 def parse_args_list(argnames):
 	parser = reqparse.RequestParser()
@@ -114,10 +132,36 @@ def parse_args_list(argnames):
 	args = parser.parse_args()
 	return args
 
+def get_collection_by_id(self, username, coll):
+	userptr = coll.find({'username' : username})
+	result = []
+	for user in userptr:
+		result.append(user['id'])
+	resp = {}
+	resp['status'] = 'OK'
+	if coll.name == 'questions':
+		resp['questions'] = result
+	else:	# coll.name == 'answers'
+		resp['answers'] = result
+	return resp
+
 def get_users_coll():
 	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
 	mydb = myclient['finalproject']
 	users = mydb['users']
+	return users
+
+def get_questions_coll():
+	# reconnecting may cause performance issues
+	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
+	mydb = myclient['finalproject']
+	users = mydb['questions']
+	return users
+
+def get_answers_coll():
+	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
+	mydb = myclient['finalproject']
+	users = mydb['answers']
 	return users
 
 api.add_resource(Authenticate, '/authenticate')
@@ -125,6 +169,8 @@ api.add_resource(Verify, '/verify')
 api.add_resource(ValidateNew, '/validatenew')
 api.add_resource(AddUser, '/adduser')
 api.add_resource(GetUserProfile, '/getuser')
+api.add_resource(GetUserQuestions '/getuserquestions')
+api.add_resource(GetUserAnswers '/getuseranswers')
 
 
 if __name__ == '__main__':
