@@ -14,7 +14,7 @@ class Authenticate(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'password'])
 		users = get_users_coll()
-		print('--------------------------args:' + str(args), sys.stderr)
+		#print('--------------------------args:' + str(args), sys.stderr)
 		user = users.find_one({'username': args['username']})
 		if user is None:
 			return {'status': 'error', 'error': 'invalid username'}
@@ -63,7 +63,7 @@ class AddUser(Resource):
 			user['email'] = email
 			user['verification'] = self._generate_code()
 			user['enabled'] = False
-			user['reputation'] = 0
+			user['reputation'] = 1
 			url = 'http://130.245.170.86/verify?email=' + email + '&key=' + user['verification']
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
@@ -74,7 +74,6 @@ class AddUser(Resource):
 		except Exception as e:
 			print(e, sys.stderr)			
 			return {"status":"error"}
-	
 	def _send_email(self, receiver, message):
 		port = 465  # For SSL
 		password = "W2v0&lkde"
@@ -88,42 +87,42 @@ class AddUser(Resource):
 		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
 class GetUserProfile(Resource):
-	def get(self):
-		args = parse_args_list(['username'])
+	def get(self, username):
+		#args = parse_args_list(['username'])
+		print(username + '&&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
 		users = get_users_coll()
-		founduser = users.find_one({'username':args['username']})
+		#founduser = users.find_one({'username':args['username']})
+		founduser = users.find_one({'username':username})
 		if founduser is None:
 			return {'status': 'error'}
 		resp = {}
-		
 		user = {}
 		user['email'] = founduser['email']
 		user['reputation'] = founduser['reputation']
-		
 		resp['user'] = user
 		resp['status'] = 'OK'
-
+		print(str(resp) + '&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
 		return resp
 
 class GetUserQuestions(Resource):
-	def get(self):
-		args = parse_args_list(['username'])
+	def get(self, username):
+		#args = parse_args_list(['username'])
 		users = get_users_coll()
-		founduser = users.find_one({'username':args['username']})
+		founduser = users.find_one({'username':username})
 		if founduser is None:
 			return {'status': 'error'}
 		questions = get_questions_coll()
-		return get_collection_by_id(args['username'], questions)
+		return get_collection_by_id(username, questions)
 
 class GetUserAnswers(Resource):
-	def get(self):
-		args = parse_args_list(['username'])
+	def get(self, username):
+		#args = parse_args_list(['username'])
 		users = get_users_coll()
-		founduser = users.find_one({'username':args['username']})
+		founduser = users.find_one({'username':username})
 		if founduser is None:
 			return {'status': 'error'}
 		answers = get_answers_coll()
-		return get_collection_by_id(args['username'], answers)
+		return get_collection_by_id(username, answers)
 
 def parse_args_list(argnames):
 	parser = reqparse.RequestParser()
@@ -133,7 +132,11 @@ def parse_args_list(argnames):
 	return args
 
 def get_collection_by_id(username, coll):
-	userptr = coll.find({'username' : username})
+	userptr = None
+	if coll.name == 'questions':
+		userptr = coll.find({'username' : username})
+	else:
+		userptr = coll.find({'user': username})
 	result = []
 	for user in userptr:
 		result.append(user['id'])
@@ -168,9 +171,9 @@ api.add_resource(Authenticate, '/authenticate')
 api.add_resource(Verify, '/verify')
 api.add_resource(ValidateNew, '/validatenew')
 api.add_resource(AddUser, '/adduser')
-api.add_resource(GetUserProfile, '/getuser')
-api.add_resource(GetUserQuestions, '/getuserquestions')
-api.add_resource(GetUserAnswers, '/getuseranswers')
+api.add_resource(GetUserProfile, '/getuser/<username>')
+api.add_resource(GetUserQuestions, '/getuserquestions/<username>')
+api.add_resource(GetUserAnswers, '/getuseranswers/<username>')
 
 
 if __name__ == '__main__':
