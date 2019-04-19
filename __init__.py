@@ -64,6 +64,8 @@ class AddUser(Resource):
 			user['verification'] = self._generate_code()
 			user['enabled'] = False
 			user['reputation'] = 1
+			user['upvoted'] = []
+			user['downvoted'] = []
 			url = 'http://130.245.170.86/verify?email=' + email + '&key=' + user['verification']
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
