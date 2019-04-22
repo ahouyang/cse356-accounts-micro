@@ -14,16 +14,16 @@ class Authenticate(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'password'])
 		users = get_users_coll()
-		#print('--------------------------args:' + str(args), sys.stderr)
+		print('Authenticating - > ' + str(args), sys.stderr)
 		user = users.find_one({'username': args['username']})
 		if user is None:
-			return {'status': 'error', 'error': 'invalid username'}
+			return {'status': 'error', 'error': 'invalid username'}, 400
 		elif user['password'] != args['password']:
-			return {'status': 'error', 'error': 'incorrect password'}
+			return {'status': 'error', 'error': 'incorrect password'}, 400
 		elif user['enabled']:
 			return {'status': 'OK'}
 		else:
-			return {'status': 'error', 'error': 'not verified'}
+			return {'status': 'error', 'error': 'not verified'}, 400
 
 class Verify(Resource):
 	def post(self):
@@ -33,27 +33,28 @@ class Verify(Resource):
 		users = get_users_coll()
 		user = users.find_one({"email":args['email']})
 		if user is None:
-			return {'status':'error', 'message': 'no such email'}
+			return {'status':'error', 'message': 'no such email'}, 400
 		elif user['verification'] == key or key == 'abracadabra':
 			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
-			return {'status':'error', 'message': 'incorrect verification key'}
+			return {'status':'error', 'message': 'incorrect verification key'}, 400
 
 class ValidateNew(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'email'])
 		users = get_users_coll()
 		if users.find({"username":args['username']}).count() > 0:
-			return {"status":"error", "message":"The requested username has already been taken."}	
+			return {"status":"error", "message":"The requested username has already been taken."}, 400
 		if users.find({"email":args['email']}).count() > 0:
-			return {"status":"error", "message":"The requested email has already been taken."}
+			return {"status":"error", "message":"The requested email has already been taken."}, 400
 		else:
 			return {'status': 'OK'}
 class AddUser(Resource):
 	def post(self):
 		try:
 			args = parse_args_list(['username', 'password', 'email'])
+			print("Adding user: {}".format(str(args)), sys.stderr)
 			username = args['username']
 			password = args['password']
 			email = args['email']
@@ -75,7 +76,7 @@ class AddUser(Resource):
 			return {"status":"OK"}
 		except Exception as e:
 			print(e, sys.stderr)			
-			return {"status":"error"}
+			return {"status":"error"}, 400
 	def _send_email(self, receiver, message):
 		port = 465  # For SSL
 		password = "W2v0&lkde"
@@ -91,19 +92,19 @@ class AddUser(Resource):
 class GetUserProfile(Resource):
 	def get(self, username):
 		#args = parse_args_list(['username'])
-		print(username + '&&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
+		#print(username + '&&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
 		users = get_users_coll()
 		#founduser = users.find_one({'username':args['username']})
 		founduser = users.find_one({'username':username})
 		if founduser is None:
-			return {'status': 'error'}
+			return {'status': 'error'}, 400
 		resp = {}
 		user = {}
 		user['email'] = founduser['email']
 		user['reputation'] = founduser['reputation']
 		resp['user'] = user
 		resp['status'] = 'OK'
-		print(str(resp) + '&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
+		#print(str(resp) + '&&&&&&&&&&&&&&&&&&&&&&&&&', sys.stderr)
 		return resp
 
 class GetUserQuestions(Resource):
@@ -122,7 +123,7 @@ class GetUserAnswers(Resource):
 		users = get_users_coll()
 		founduser = users.find_one({'username':username})
 		if founduser is None:
-			return {'status': 'error'}
+			return {'status': 'error'}, 400
 		answers = get_answers_coll()
 		return get_collection_by_id(username, answers)
 
