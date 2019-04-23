@@ -6,6 +6,7 @@ import sys
 import smtplib, ssl 
 import string 
 import random
+import smtplib
 
 app = Flask(__name__)
 api = Api(app)
@@ -80,14 +81,26 @@ class AddUser(Resource):
 			print(e, sys.stderr)			
 			return {"status":"error"}, 400
 	def _send_email(self, receiver, message):
-		port = 465  # For SSL
-		password = "W2v0&lkde"
-		# Create a secure SSL context
-		context = ssl.create_default_context()
-		server = smtplib.SMTP_SSL("smtp.gmail.com", port)
-		server.login("ljkasdfoir21395@gmail.com", password)
-		# TODO: Send email here
-		server.sendmail("ljkasdfoir21395@gmail.com", receiver, message)
+		sender = 'ubuntu@flask-micro-2.cloud.compas.cs.stonybrook.edu'
+		receivers = [receiver]
+		email = '''From: From Person <{}>
+		To: To Person <{}>
+		{}
+		'''.format(sender, receiver, message)
+		try:
+			smtpObj = smtplib.SMTP('localhost')
+			smtpObj.sendmail(sender, receivers, email)         
+			print("Successfully sent email", sys.stderr)
+		except Exception:
+			print("Error: unable to send email", sys.stderr)
+		# port = 465  # For SSL
+		# password = "W2v0&lkde"
+		# # Create a secure SSL context
+		# context = ssl.create_default_context()
+		# server = smtplib.SMTP_SSL("smtp.gmail.com", port)
+		# server.login("ljkasdfoir21395@gmail.com", password)
+		# # TODO: Send email here
+		# server.sendmail("ljkasdfoir21395@gmail.com", receiver, message)
 	def _generate_code(self):
 		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
