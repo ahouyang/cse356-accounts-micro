@@ -14,7 +14,7 @@ class Authenticate(Resource):
 	def post(self):
 		args = parse_args_list(['username', 'password'])
 		users = get_users_coll()
-		print('Authenticating - > ' + str(args), sys.stderr)
+		#print('Authenticating - > ' + str(args), sys.stderr)
 		user = users.find_one({'username': args['username']})
 		if user is None:
 			return {'status': 'error', 'error': 'invalid username'}, 400
@@ -28,11 +28,13 @@ class Authenticate(Resource):
 class Verify(Resource):
 	def post(self):
 		args = parse_args_list(['email', 'key'])
+		print("verifying user {}".format(str(args)), sys.stderr)
 		email = args['email']
 		key = args['key']
 		users = get_users_coll()
 		user = users.find_one({"email":args['email']})
 		if user is None:
+			print('args -> ' + str(args), sys.stderr)
 			return {'status':'error', 'message': 'no such email'}, 400
 		elif user['verification'] == key or key == 'abracadabra':
 			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
