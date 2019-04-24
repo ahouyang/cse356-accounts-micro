@@ -10,6 +10,11 @@ import smtplib
 
 app = Flask(__name__)
 api = Api(app)
+myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
+mydb = myclient['finalproject']
+users = mydb['users']
+questions = mydb['questions']
+answers = mydb['answers']
 
 class Authenticate(Resource):
 	def post(self):
@@ -167,23 +172,13 @@ def get_collection_by_id(username, coll):
 	return resp
 
 def get_users_coll():
-	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
-	mydb = myclient['finalproject']
-	users = mydb['users']
 	return users
 
 def get_questions_coll():
-	# reconnecting may cause performance issues
-	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
-	mydb = myclient['finalproject']
-	users = mydb['questions']
-	return users
+	return questions
 
 def get_answers_coll():
-	myclient = pymongo.MongoClient('mongodb://130.245.170.88:27017/')
-	mydb = myclient['finalproject']
-	users = mydb['answers']
-	return users
+	return answers
 
 api.add_resource(Authenticate, '/authenticate')
 api.add_resource(Verify, '/verify')
