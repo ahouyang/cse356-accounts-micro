@@ -7,6 +7,8 @@ import smtplib, ssl
 import string 
 import random
 import smtplib
+import json
+import pika
 
 app = Flask(__name__)
 api = Api(app)
@@ -79,8 +81,14 @@ class AddUser(Resource):
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
 			self._send_email(email, message)
-			users = get_users_coll()
-			users.insert(user)
+			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+			channel = connection.channel()
+			channel.queue_declare(queue='mongo', durable=True)
+			user['collection'] = 'users'
+			msg = json.dumps(user)
+			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			# users = get_users_coll()
+			# users.insert(user)
 			return {"status":"OK"}
 		except Exception as e:
 			print(e, sys.stderr)			
