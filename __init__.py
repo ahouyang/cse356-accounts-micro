@@ -45,7 +45,17 @@ class Verify(Resource):
 			print('args -> ' + str(args), sys.stderr)
 			return {'status':'error', 'message': 'no such email'}, 400
 		elif user['verification'] == key or key == 'abracadabra':
-			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
+			write = {}
+			write['collection'] = 'users'
+			write['action'] = 'update'
+			write['filter'] = {"email":args['email']}
+			write['update'] = {"$set":{"enabled":True}}
+			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+			channel = connection.channel()
+			channel.queue_declare(queue='mongo', durable=True)
+			msg = json.dumps(user)
+			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			# users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
 			return {'status':'error', 'message': 'incorrect verification key'}, 400
@@ -85,6 +95,7 @@ class AddUser(Resource):
 			channel = connection.channel()
 			channel.queue_declare(queue='mongo', durable=True)
 			user['collection'] = 'users'
+			user['action'] = 'insert'
 			msg = json.dumps(user)
 			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
 			# users = get_users_coll()
