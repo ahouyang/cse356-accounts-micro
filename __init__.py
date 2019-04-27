@@ -65,9 +65,9 @@ class ValidateNew(Resource):
 		args = parse_args_list(['username', 'email'])
 		users = get_users_coll()
 		if users.find({"username":args['username']}).count() > 0:
-			return {"status":"error", "message":"The requested username has already been taken."}, 400
+			return {"status":"error", "error":"The requested username has already been taken."}, 400
 		if users.find({"email":args['email']}).count() > 0:
-			return {"status":"error", "message":"The requested email has already been taken."}, 400
+			return {"status":"error", "error":"The requested email has already been taken."}, 400
 		else:
 			return {'status': 'OK'}
 class AddUser(Resource):
@@ -78,6 +78,7 @@ class AddUser(Resource):
 			username = args['username']
 			password = args['password']
 			email = args['email']
+
 			user = {}
 			user['username'] = username
 			user['password'] = password
