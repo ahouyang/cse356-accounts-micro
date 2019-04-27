@@ -87,6 +87,8 @@ class AddUser(Resource):
 			user['reputation'] = 1
 			user['upvoted'] = []
 			user['downvoted'] = []
+			user['upvoted_waived'] = []
+			user['downvoted_waived'] = []
 			url = 'http://130.245.170.86/verify?email=' + email + '&key=' + user['verification']
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
