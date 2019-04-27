@@ -53,7 +53,7 @@ class Verify(Resource):
 			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
 			channel = connection.channel()
 			channel.queue_declare(queue='mongo', durable=True)
-			msg = json.dumps(user)
+			msg = json.dumps(write)
 			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
 			# users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
