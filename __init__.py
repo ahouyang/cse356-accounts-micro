@@ -43,7 +43,7 @@ class Verify(Resource):
 		user = users.find_one({"email":args['email']})
 		if user is None:
 			print('args -> ' + str(args), sys.stderr)
-			return {'status':'error', 'message': 'no such email'}, 400
+			return {'status':'error', 'error': 'no such email'}, 400
 		elif user['verification'] == key or key == 'abracadabra':
 			write = {}
 			write['collection'] = 'users'
@@ -58,7 +58,7 @@ class Verify(Resource):
 			# users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
-			return {'status':'error', 'message': 'incorrect verification key'}, 400
+			return {'status':'error', 'error': 'incorrect verification key'}, 400
 
 class ValidateNew(Resource):
 	def post(self):
