@@ -116,7 +116,7 @@ class AddUser(Resource):
 		msg['email'] = '''From: From Person <{}>
 		To: To Person <{}>
 		{}
-		'''.format(sender, receiver, message)
+		'''.format(msg['sender'], receiver, message)
 		connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
 		channel = connection.channel()
 		channel.queue_declare(queue='email', durable=True)
