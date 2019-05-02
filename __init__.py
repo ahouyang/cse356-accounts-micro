@@ -101,6 +101,8 @@ class AddUser(Resource):
 			user['action'] = 'insert'
 			msg = json.dumps(user)
 			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			# channel.queue_declare(queue='email', durable=True)
+
 			# users = get_users_coll()
 			# users.insert(user)
 			return {"status":"OK"}
@@ -108,18 +110,25 @@ class AddUser(Resource):
 			print(e, sys.stderr)			
 			return {"status":"error"}, 400
 	def _send_email(self, receiver, message):
-		sender = 'ubuntu@flask-micro-2.cloud.compas.cs.stonybrook.edu'
-		receivers = [receiver]
-		email = '''From: From Person <{}>
+		msg = {}
+		msg['sender'] = 'ubuntu@flask-micro-2.cloud.compas.cs.stonybrook.edu'
+		msg['receivers'] = [receiver]
+		msg['email'] = '''From: From Person <{}>
 		To: To Person <{}>
 		{}
 		'''.format(sender, receiver, message)
-		try:
-			smtpObj = smtplib.SMTP('localhost')
-			smtpObj.sendmail(sender, receivers, email)         
-			print("Successfully sent email", sys.stderr)
-		except Exception:
-			print("Error: unable to send email", sys.stderr)
+		connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+		channel = connection.channel()
+		channel.queue_declare(queue='email', durable=True)
+		sent = json.dumps(msg)
+		channel.basic_publish(exchange='',routing_key='email', body=sent)
+		
+		# try:
+		# 	smtpObj = smtplib.SMTP('localhost')
+		# 	smtpObj.sendmail(sender, receivers, email)         
+		# 	print("Successfully sent email", sys.stderr)
+		# except Exception:
+		# 	print("Error: unable to send email", sys.stderr)
 		# port = 465  # For SSL
 		# password = "W2v0&lkde"
 		# # Create a secure SSL context
