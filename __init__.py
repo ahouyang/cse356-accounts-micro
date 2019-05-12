@@ -96,15 +96,15 @@ class AddUser(Resource):
 			self._send_email(email, message)
 			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
 			channel = connection.channel()
-			# channel.queue_declare(queue='mongo', durable=True)
-			# user['collection'] = 'users'
-			# user['action'] = 'insert'
-			# msg = json.dumps(user)
-			# channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			channel.queue_declare(queue='mongo', durable=True)
+			user['collection'] = 'users'
+			user['action'] = 'insert'
+			msg = json.dumps(user)
+			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
 			# channel.queue_declare(queue='email', durable=True)
 
 			users = get_users_coll()
-			users.insert(user)
+			# users.insert(user)
 			return {"status":"OK"}
 		except Exception as e:
 			print(e, sys.stderr)			
