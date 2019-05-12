@@ -50,12 +50,12 @@ class Verify(Resource):
 			write['action'] = 'update'
 			write['filter'] = {"email":args['email']}
 			write['update'] = {"$set":{"enabled":True}}
-			# connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
-			# channel = connection.channel()
-			# channel.queue_declare(queue='mongo', durable=True)
-			# msg = json.dumps(write)
-			# channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
-			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
+			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+			channel = connection.channel()
+			channel.queue_declare(queue='mongo', durable=True)
+			msg = json.dumps(write)
+			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			# users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
 			return {'status':'error', 'error': 'incorrect verification key'}, 400
