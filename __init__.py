@@ -50,12 +50,12 @@ class Verify(Resource):
 			write['action'] = 'update'
 			write['filter'] = {"email":args['email']}
 			write['update'] = {"$set":{"enabled":True}}
-			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
-			channel = connection.channel()
-			channel.queue_declare(queue='mongo', durable=True)
-			msg = json.dumps(write)
-			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
-			# users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
+			# connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+			# channel = connection.channel()
+			# channel.queue_declare(queue='mongo', durable=True)
+			# msg = json.dumps(write)
+			# channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			users.update_one({"email":args['email']}, {"$set":{"enabled":True}})
 			return {'status':'OK'}
 		else:
 			return {'status':'error', 'error': 'incorrect verification key'}, 400
@@ -94,17 +94,17 @@ class AddUser(Resource):
 			message = 'Subject: Verify Your Email\n\n Click here to verify your email\n' + url + '\n'
 			message += 'validation key: <' + user['verification'] + '>'
 			self._send_email(email, message)
-			connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
-			channel = connection.channel()
-			channel.queue_declare(queue='mongo', durable=True)
-			user['collection'] = 'users'
-			user['action'] = 'insert'
-			msg = json.dumps(user)
-			channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
+			# connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+			# channel = connection.channel()
+			# channel.queue_declare(queue='mongo', durable=True)
+			# user['collection'] = 'users'
+			# user['action'] = 'insert'
+			# msg = json.dumps(user)
+			# channel.basic_publish(exchange='mongodb',routing_key='mongo', body=msg)
 			# channel.queue_declare(queue='email', durable=True)
 
 			users = get_users_coll()
-			# users.insert(user)
+			users.insert(user)
 			return {"status":"OK"}
 		except Exception as e:
 			print(e, sys.stderr)			
