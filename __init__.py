@@ -117,7 +117,7 @@ class AddUser(Resource):
 		To: To Person <{}>
 		{}
 		'''.format(msg['sender'], receiver, message)
-		connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.23'))
+		connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.122.47'))
 		channel = connection.channel()
 		channel.queue_declare(queue='email', durable=True)
 		sent = json.dumps(msg)
